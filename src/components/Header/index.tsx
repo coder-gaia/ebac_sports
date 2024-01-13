@@ -1,9 +1,7 @@
 import * as S from './styles'
-
-import { Produto } from '../../App'
-
 import cesta from '../../assets/cesta.png'
 import { paraReal } from '../Produto'
+import { Produto } from '../../App'
 
 type Props = {
   itensNoCarrinho: Produto[]
@@ -11,6 +9,8 @@ type Props = {
 }
 
 const Header = ({ itensNoCarrinho, favoritos }: Props) => {
+  console.log('Favoritos in Header:', favoritos)
+
   const valorTotal = itensNoCarrinho.reduce((acc, item) => {
     acc += item.preco
     return acc
@@ -20,8 +20,8 @@ const Header = ({ itensNoCarrinho, favoritos }: Props) => {
     <S.Header>
       <h1>EBAC Sports</h1>
       <div>
-        <span>{favoritos.length} favoritos</span>
-        <img src={cesta} />
+        <span>favoritos {favoritos.length}</span>
+        <img src={cesta} alt="Cesta de Compras" />{' '}
         <span>
           {itensNoCarrinho.length} itens, valor total: {paraReal(valorTotal)}
         </span>

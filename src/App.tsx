@@ -1,7 +1,13 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import store, { RootState } from './store'
+import { carregarProdutos } from './produtoSlice'
+import { AppDispatch } from './store'
+import { favoritar } from './favoritoSlice'
+import { adicionarAoCarrinho } from './carrinhoSlice'
+
 import Header from './components/Header'
 import Produtos from './containers/Produtos'
-
 import { GlobalStyle } from './styles'
 
 export type Produto = {
@@ -12,46 +18,40 @@ export type Produto = {
 }
 
 function App() {
-  const [produtos, setProdutos] = useState<Produto[]>([])
-  const [carrinho, setCarrinho] = useState<Produto[]>([])
-  const [favoritos, setFavoritos] = useState<Produto[]>([])
+  const dispatch: AppDispatch = useDispatch()
 
   useEffect(() => {
-    fetch('https://fake-api-tau.vercel.app/api/ebac_sports')
-      .then((res) => res.json())
-      .then((res) => setProdutos(res))
-  }, [])
+    dispatch(carregarProdutos())
+  }, [dispatch])
 
-  function adicionarAoCarrinho(produto: Produto) {
-    if (carrinho.find((p) => p.id === produto.id)) {
-      alert('Item já adicionado')
-    } else {
-      setCarrinho([...carrinho, produto])
-    }
+  const produtos = useSelector((state: RootState) => state.produtos.lista)
+  const favoritos = useSelector((state: RootState) => state.favoritos.itens)
+  const carrinho = useSelector((state: RootState) => state.carrinho.itens)
+
+  const handleAdicionarAoCarrinho = (produto: Produto) => {
+    dispatch(adicionarAoCarrinho(produto))
   }
 
-  function favoritar(produto: Produto) {
-    if (favoritos.find((p) => p.id === produto.id)) {
-      const favoritosSemProduto = favoritos.filter((p) => p.id !== produto.id)
-      setFavoritos(favoritosSemProduto)
-    } else {
-      setFavoritos([...favoritos, produto])
-    }
+  const handleFavoritar = (produto: Produto) => {
+    dispatch(favoritar(produto))
+    console.log('Chamada para handleFavoritar com produto:', produto)
   }
 
   return (
-    <>
-      <GlobalStyle />
-      <div className="container">
-        <Header favoritos={favoritos} itensNoCarrinho={carrinho} />
-        <Produtos
-          produtos={produtos}
-          favoritos={favoritos}
-          favoritar={favoritar}
-          adicionarAoCarrinho={adicionarAoCarrinho}
-        />
-      </div>
-    </>
+    <Provider store={store}>
+      <>
+        <GlobalStyle />
+        <div className="container">
+          <Header itensNoCarrinho={carrinho} favoritos={favoritos} />
+          <Produtos
+            produtos={produtos}
+            favoritos={favoritos}
+            adicionarAoCarrinho={handleAdicionarAoCarrinho}
+            favoritar={handleFavoritar}
+          />
+        </div>
+      </>
+    </Provider>
   )
 }
 
